@@ -12,8 +12,13 @@
 	}
 
 	reverse_proxy 127.0.0.1:9119 {
-		header_up Host {host}
+		# Hermes dashboard validates Host == its bind address (127.0.0.1).
+		# Override the upstream Host so the dashboard accepts the request,
+		# but preserve the original public host in X-Forwarded-Host.
+		header_up Host 127.0.0.1:9119
 		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Proto {scheme}
 	}
 
 	log {
