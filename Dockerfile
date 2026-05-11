@@ -4,6 +4,7 @@ USER root
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        bash \
         debian-keyring \
         debian-archive-keyring \
         apt-transport-https \
@@ -22,4 +23,6 @@ COPY Caddyfile.tmpl /etc/caddy/Caddyfile.tmpl
 COPY start.sh /usr/local/bin/hermes-railway-start
 RUN chmod +x /usr/local/bin/hermes-railway-start
 
-ENTRYPOINT ["/usr/local/bin/hermes-railway-start"]
+# Keep tini as PID 1 (inherited from upstream image) for signal forwarding
+# and zombie reaping; our wrapper script runs under it.
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/usr/local/bin/hermes-railway-start"]
